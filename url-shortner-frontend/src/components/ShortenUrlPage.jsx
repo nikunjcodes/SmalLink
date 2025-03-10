@@ -11,34 +11,45 @@ const ShortenUrlPage = () => {
   useEffect(() => {
     const redirectToOriginalUrl = async () => {
       try {
-        console.log("Attempting to fetch URL for:", url); // Debug log
-
-        // Make sure we're using the correct API endpoint
+        console.log("Fetching URL for:", url);
         const response = await api.get(`/api/urls/redirect/${url}`);
-        console.log("API Response:", response.data); // Debug log
+        console.log("API Response:", response.data);
 
         if (response.data.originalUrl) {
           let redirectUrl = response.data.originalUrl;
-          if (
-            !redirectUrl.startsWith("http://") &&
-            !redirectUrl.startsWith("https://")
-          ) {
+
+          // Ensure URL has proper protocol
+          if (!redirectUrl.match(/^https?:\/\//i)) {
             redirectUrl = "https://" + redirectUrl;
           }
-          console.log("Redirecting to:", redirectUrl); // Debug log
-          window.location.href = redirectUrl;
+
+          console.log("Redirecting to:", redirectUrl);
+
+          // Method 1: Using window.location.replace
+          window.location.replace(redirectUrl);
+
+          // Method 2 (fallback): Using window.location.href
+          setTimeout(() => {
+            if (window.location.href !== redirectUrl) {
+              window.location.href = redirectUrl;
+            }
+          }, 100);
+
+          // Method 3 (fallback): Using anchor tag
+          setTimeout(() => {
+            const link = document.createElement("a");
+            link.href = redirectUrl;
+            link.target = "_self";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }, 200);
         } else {
-          console.error("No original URL found in response");
-          setError("URL not found");
-          navigate("/error", {
-            state: {
-              message: "This short link doesn't exist or has been removed",
-            },
-          });
+          throw new Error("Invalid URL response");
         }
       } catch (error) {
-        console.error("Redirect error:", error.response || error);
-        setError(error.response?.data?.message || "An error occurred");
+        console.error("Redirect error:", error);
+        setError(error.message || "An error occurred");
         navigate("/error", {
           state: {
             message:
@@ -53,24 +64,25 @@ const ShortenUrlPage = () => {
     }
   }, [url, navigate]);
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-bg-dark flex items-center justify-center">
+  return (
+    <div className="min-h-screen bg-bg-dark flex flex-col items-center justify-center">
+      {error ? (
         <div className="text-text-primary text-center">
           <h1 className="text-2xl font-bold mb-2">Error</h1>
           <p>{error}</p>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-bg-dark flex items-center justify-center">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full"
-      />
+      ) : (
+        <>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full mb-4"
+          />
+          <p className="text-text-secondary">
+            Redirecting you to your destination...
+          </p>
+        </>
+      )}
     </div>
   );
 };

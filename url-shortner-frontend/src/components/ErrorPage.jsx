@@ -1,27 +1,25 @@
-import React from 'react'
-import { FaExclamationTriangle } from 'react-icons/fa'
-import { useNavigate } from 'react-router-dom'
+import React from "react";
+import { useLocation, Link } from "react-router-dom";
 
 const ErrorPage = ({ message }) => {
-    const navigate = useNavigate();
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] bg-gray-100 p-6">
-        <FaExclamationTriangle className='text-6xl text-red-500 mb-4' />
-        <h1 className='text-3xl font-bold mb-2 text-gray-800'>
-            Oops! Something went wrong.
-        </h1>
-        <p className='text-gray-600 mb-6 text-center'>
-            {message ? message : "An unexpected error has occured"}
-        </p>
-        <button onClick={() => {
-            navigate("/");
-        }}
-        className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition'
-        >
-            Go back to home
-        </button>
-    </div>
-  )
-}
+  const location = useLocation();
+  const errorMessage =
+    location.state?.message || message || "An error occurred";
 
-export default ErrorPage
+  return (
+    <div className="min-h-screen bg-bg-dark flex items-center justify-center p-4">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-text-primary mb-4">Oops!</h1>
+        <p className="text-text-secondary mb-8">{errorMessage}</p>
+        <Link
+          to="/"
+          className="px-6 py-3 bg-brand-primary hover:bg-brand-hover text-text-primary rounded-md font-medium transition-colors duration-200"
+        >
+          Go Back Home
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default ErrorPage;

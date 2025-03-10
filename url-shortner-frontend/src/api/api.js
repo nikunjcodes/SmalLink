@@ -6,6 +6,10 @@ const api = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
+  maxRedirects: 0,
+  validateStatus: function (status) {
+    return status >= 200 && status < 400;
+  },
 });
 
 // Add request interceptor for debugging
@@ -14,7 +18,6 @@ api.interceptors.request.use(
     console.log("API Request:", {
       url: config.url,
       method: config.method,
-      headers: config.headers,
     });
     return config;
   },
@@ -27,11 +30,23 @@ api.interceptors.request.use(
 // Add response interceptor for debugging
 api.interceptors.response.use(
   (response) => {
-    console.log("API Response:", response);
+    console.log("API Response:", {
+      status: response.status,
+      data: response.data,
+      headers: response.headers,
+    });
     return response;
   },
   (error) => {
-    console.error("API Response Error:", error.response || error);
+    if (error.response) {
+      console.error("API Error Response:", {
+        status: error.response.status,
+        data: error.response.data,
+        headers: error.response.headers,
+      });
+    } else {
+      console.error("API Error:", error);
+    }
     return Promise.reject(error);
   }
 );

@@ -17,7 +17,8 @@ import ErrorPage from "./components/ErrorPage";
 
 const AppRouter = () => {
   const location = useLocation();
-  const hideHeaderFooter = location.pathname.startsWith("/s/");
+  const hideHeaderFooter =
+    location.pathname.startsWith("/s/") || location.pathname === "/s";
 
   return (
     <>

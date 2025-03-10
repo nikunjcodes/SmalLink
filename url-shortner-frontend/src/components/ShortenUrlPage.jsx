@@ -1,21 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/api";
 import { motion } from "framer-motion";
 
 const ShortenUrlPage = () => {
   const { url } = useParams();
   const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const redirectToOriginalUrl = async () => {
       try {
-        // Remove any 's/' prefix if it exists
-        const cleanUrl = url.replace(/^s\//, "");
-        const response = await api.get(`/api/urls/${cleanUrl}`);
+        console.log("Attempting to fetch URL for:", url); // Debug log
+
+        // Make sure we're using the correct API endpoint
+        const response = await api.get(`/api/urls/redirect/${url}`);
+        console.log("API Response:", response.data); // Debug log
 
         if (response.data.originalUrl) {
-          // Add proper protocol if missing
           let redirectUrl = response.data.originalUrl;
           if (
             !redirectUrl.startsWith("http://") &&
@@ -23,18 +25,44 @@ const ShortenUrlPage = () => {
           ) {
             redirectUrl = "https://" + redirectUrl;
           }
+          console.log("Redirecting to:", redirectUrl); // Debug log
           window.location.href = redirectUrl;
         } else {
-          navigate("/error");
+          console.error("No original URL found in response");
+          setError("URL not found");
+          navigate("/error", {
+            state: {
+              message: "This short link doesn't exist or has been removed",
+            },
+          });
         }
       } catch (error) {
-        console.error("Redirect error:", error);
-        navigate("/error");
+        console.error("Redirect error:", error.response || error);
+        setError(error.response?.data?.message || "An error occurred");
+        navigate("/error", {
+          state: {
+            message:
+              "Unable to process this short link. Please try again later.",
+          },
+        });
       }
     };
 
-    redirectToOriginalUrl();
+    if (url) {
+      redirectToOriginalUrl();
+    }
   }, [url, navigate]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-bg-dark flex items-center justify-center">
+        <div className="text-text-primary text-center">
+          <h1 className="text-2xl font-bold mb-2">Error</h1>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg-dark flex items-center justify-center">

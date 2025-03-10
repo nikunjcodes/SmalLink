@@ -11,7 +11,6 @@ import { useStoreContext } from "../../contextApi/ContextApi";
 import { Hourglass } from "react-loader-spinner";
 import Graph from "./Graph";
 import { motion } from "framer-motion";
-import * as Loader from "react-loader-spinner";
 
 const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
   const { token } = useStoreContext();
@@ -137,7 +136,17 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
       {analyticToggle && (
         <div className="mt-6 border-t border-border-light pt-6">
           {loader ? (
-            <Loader />
+            <div className="flex justify-center items-center h-96">
+              <Hourglass
+                visible={true}
+                height="80"
+                width="80"
+                ariaLabel="hourglass-loading"
+                wrapperStyle={{}}
+                wrapperClass=""
+                colors={["#3B82F6", "#1D4ED8"]}
+              />
+            </div>
           ) : (
             <div className="h-96 relative">
               {analyticsData.length === 0 ? (

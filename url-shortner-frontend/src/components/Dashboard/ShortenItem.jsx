@@ -63,6 +63,13 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
     }
   }, [selectedUrl]);
 
+  const constructShortUrl = () => {
+    const baseUrl = import.meta.env.VITE_REACT_FRONT_END_URL;
+    // Remove any trailing slashes
+    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+    return `${cleanBaseUrl}/s/${shortUrl}`;
+  };
+
   return (
     <div className="bg-bg-card border border-border-light rounded-lg p-6 mb-4 transition-all duration-200 hover:border-brand-primary">
       <div className="flex sm:flex-row flex-col sm:justify-between w-full sm:gap-4 gap-5">
@@ -71,9 +78,9 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
             <Link
               target="_blank"
               className="text-brand-primary hover:text-brand-hover font-mono text-lg transition-colors duration-200"
-              to={`${import.meta.env.VITE_REACT_FRONT_END_URL}/s/${shortUrl}`}
+              to={constructShortUrl()}
             >
-              {subDomain + "/s/" + shortUrl}
+              {constructShortUrl()}
             </Link>
             <FaExternalLinkAlt className="text-text-secondary" />
           </div>
@@ -110,7 +117,7 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
 
           <CopyToClipboard
             onCopy={() => setIsCopied(true)}
-            text={`${import.meta.env.VITE_REACT_FRONT_END_URL}/s/${shortUrl}`}
+            text={constructShortUrl()}
           >
             <motion.button
               whileHover={{ scale: 1.02 }}

@@ -16,7 +16,7 @@ import ErrorPage from "./components/ErrorPage";
 // </PrivateRoute>
 
 const AppRouter = () => {
-  const hideHeaderFooter = location.pathname.startsWith("/s");
+  const hideHeaderFooter = window.location.pathname.startsWith("/s/");
 
   return (
     <>
@@ -65,12 +65,12 @@ const AppRouter = () => {
   );
 };
 
-export default AppRouter;
-
 export const SubDomainRouter = () => {
   return (
     <Routes>
-      <Route path="/s/:url" element={<ShortenUrlPage />} />
+      <Route path="/:url" element={<ShortenUrlPage />} />
     </Routes>
   );
 };
+
+export default AppRouter;

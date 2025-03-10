@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/NavBar";
 import ShortenUrlPage from "./components/ShortenUrlPage";
 import { Toaster } from "react-hot-toast";
@@ -16,7 +16,8 @@ import ErrorPage from "./components/ErrorPage";
 // </PrivateRoute>
 
 const AppRouter = () => {
-  const hideHeaderFooter = window.location.pathname.startsWith("/s/");
+  const location = useLocation();
+  const hideHeaderFooter = location.pathname.startsWith("/s/");
 
   return (
     <>
@@ -26,6 +27,7 @@ const AppRouter = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/s/:url" element={<ShortenUrlPage />} />
+        <Route path="/:url" element={<ShortenUrlPage />} />
 
         <Route
           path="/register"
@@ -68,7 +70,15 @@ const AppRouter = () => {
 export const SubDomainRouter = () => {
   return (
     <Routes>
+      <Route path="/" element={<ErrorPage />} />
       <Route path="/:url" element={<ShortenUrlPage />} />
+      <Route path="/s/:url" element={<ShortenUrlPage />} />
+      <Route
+        path="*"
+        element={
+          <ErrorPage message="We can't seem to find the page you're looking for" />
+        }
+      />
     </Routes>
   );
 };

@@ -1,46 +1,19 @@
 {
   "version": 2,
-  "routes": [
-    {
-      "src": "/s/(.*)",
-      "dest": "/index.html",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
-      }
-    },
-    {
-      "src": "/dashboard",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/login",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/register",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/about",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/error",
-      "dest": "/index.html"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "status": 404,
-      "dest": "/"
-    }
-  ],
   "rewrites": [
+    { "source": "/s/:path*", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/register", "destination": "/index.html" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/error", "destination": "/index.html" },
+    { "source": "/((?!api/.*).*)", "destination": "/index.html" }
+  ],
+  "redirects": [
     {
-      "source": "/((?!api/.*).*)",
-      "destination": "/index.html"
+      "source": "/:path((?!api|s|dashboard|login|register|about|error).*)",
+      "destination": "/",
+      "permanent": false
     }
   ],
   "headers": [

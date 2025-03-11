@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import axios from "axios"; // Import axios directly
 import { motion } from "framer-motion";
 
 const ShortenUrlPage = () => {
@@ -13,32 +13,41 @@ const ShortenUrlPage = () => {
       try {
         console.log("Fetching URL for:", url);
 
-        // Update the endpoint to match your backend
-        const response = await api.get(`/${url}`, {
-          maxRedirects: 0, // Prevent axios from following redirects
-          validateStatus: (status) => {
-            return status >= 200 && status < 400; // Accept redirect status codes
+        // Make request directly to the backend URL
+        const response = await axios({
+          method: "GET",
+          url: `${import.meta.env.VITE_BACKEND_URL}/${url}`,
+          maxRedirects: 0,
+          validateStatus: function (status) {
+            return status >= 200 && status < 400;
           },
         });
 
-        // Get the redirect URL from the Location header
-        const redirectUrl = response.headers.location;
-        console.log("Redirect URL from headers:", redirectUrl);
+        console.log("Response:", response);
 
-        if (redirectUrl) {
+        // Check if we got a redirect response
+        if (response.status === 302 && response.headers.location) {
+          let redirectUrl = response.headers.location;
+
           // Ensure URL has proper protocol
-          let finalUrl = redirectUrl;
-          if (!finalUrl.match(/^https?:\/\//i)) {
-            finalUrl = "https://" + finalUrl;
+          if (!redirectUrl.match(/^https?:\/\//i)) {
+            redirectUrl = "https://" + redirectUrl;
           }
 
-          console.log("Redirecting to:", finalUrl);
-          window.location.href = finalUrl;
+          console.log("Redirecting to:", redirectUrl);
+          window.location.href = redirectUrl;
         } else {
-          throw new Error("No redirect URL found");
+          // If no redirect, go to home page
+          navigate("/", {
+            state: {
+              message: "Invalid short link",
+            },
+          });
         }
       } catch (error) {
         console.error("Redirect error:", error);
+        console.log("Error response:", error.response);
+
         if (error.response?.status === 404) {
           navigate("/", {
             state: {
@@ -46,6 +55,7 @@ const ShortenUrlPage = () => {
             },
           });
         } else {
+          // For network errors or other issues
           navigate("/error", {
             state: {
               message:

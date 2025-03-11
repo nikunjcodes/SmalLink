@@ -7,7 +7,7 @@ const api = axios.create({
     Accept: "application/json",
   },
   maxRedirects: 0,
-  validateStatus: function (status) {
+  validateStatus: (status) => {
     return status >= 200 && status < 400;
   },
 });
@@ -32,21 +32,13 @@ api.interceptors.response.use(
   (response) => {
     console.log("API Response:", {
       status: response.status,
-      data: response.data,
       headers: response.headers,
+      data: response.data,
     });
     return response;
   },
   (error) => {
-    if (error.response) {
-      console.error("API Error Response:", {
-        status: error.response.status,
-        data: error.response.data,
-        headers: error.response.headers,
-      });
-    } else {
-      console.error("API Error:", error);
-    }
+    console.error("API Error:", error.response || error);
     return Promise.reject(error);
   }
 );

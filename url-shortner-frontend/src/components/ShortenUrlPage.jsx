@@ -12,50 +12,47 @@ const ShortenUrlPage = () => {
     const redirectToOriginalUrl = async () => {
       try {
         console.log("Fetching URL for:", url);
-        const response = await api.get(`/api/urls/redirect/${url}`);
-        console.log("API Response:", response.data);
 
-        if (response.data.originalUrl) {
-          let redirectUrl = response.data.originalUrl;
+        // Update the endpoint to match your backend
+        const response = await api.get(`/${url}`, {
+          maxRedirects: 0, // Prevent axios from following redirects
+          validateStatus: (status) => {
+            return status >= 200 && status < 400; // Accept redirect status codes
+          },
+        });
 
+        // Get the redirect URL from the Location header
+        const redirectUrl = response.headers.location;
+        console.log("Redirect URL from headers:", redirectUrl);
+
+        if (redirectUrl) {
           // Ensure URL has proper protocol
-          if (!redirectUrl.match(/^https?:\/\//i)) {
-            redirectUrl = "https://" + redirectUrl;
+          let finalUrl = redirectUrl;
+          if (!finalUrl.match(/^https?:\/\//i)) {
+            finalUrl = "https://" + finalUrl;
           }
 
-          console.log("Redirecting to:", redirectUrl);
-
-          // Method 1: Using window.location.replace
-          window.location.replace(redirectUrl);
-
-          // Method 2 (fallback): Using window.location.href
-          setTimeout(() => {
-            if (window.location.href !== redirectUrl) {
-              window.location.href = redirectUrl;
-            }
-          }, 100);
-
-          // Method 3 (fallback): Using anchor tag
-          setTimeout(() => {
-            const link = document.createElement("a");
-            link.href = redirectUrl;
-            link.target = "_self";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }, 200);
+          console.log("Redirecting to:", finalUrl);
+          window.location.href = finalUrl;
         } else {
-          throw new Error("Invalid URL response");
+          throw new Error("No redirect URL found");
         }
       } catch (error) {
         console.error("Redirect error:", error);
-        setError(error.message || "An error occurred");
-        navigate("/error", {
-          state: {
-            message:
-              "Unable to process this short link. Please try again later.",
-          },
-        });
+        if (error.response?.status === 404) {
+          navigate("/", {
+            state: {
+              message: "This short link doesn't exist",
+            },
+          });
+        } else {
+          navigate("/error", {
+            state: {
+              message:
+                "Unable to process this short link. Please try again later.",
+            },
+          });
+        }
       }
     };
 
@@ -66,23 +63,14 @@ const ShortenUrlPage = () => {
 
   return (
     <div className="min-h-screen bg-bg-dark flex flex-col items-center justify-center">
-      {error ? (
-        <div className="text-text-primary text-center">
-          <h1 className="text-2xl font-bold mb-2">Error</h1>
-          <p>{error}</p>
-        </div>
-      ) : (
-        <>
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full mb-4"
-          />
-          <p className="text-text-secondary">
-            Redirecting you to your destination...
-          </p>
-        </>
-      )}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full mb-4"
+      />
+      <p className="text-text-secondary">
+        Redirecting you to your destination...
+      </p>
     </div>
   );
 };
